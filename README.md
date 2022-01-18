@@ -10,7 +10,8 @@
 [Player's Work: Kakao](https://tv.kakao.com/channel/3150758/cliplink/391419281?playlistId=209907&metaObjectType=Playlist)
 
 ## About Skill Set(Software)
-
+[Pandas best practices-1](https://www.kaggle.com/faressayah/data-science-best-practices-with-pandas-part-1)
+[Pandas best practices-2](https://www.kaggle.com/faressayah/data-science-best-practices-with-pandas-part-2)
 
 ## About Skill Set(ML)
 
