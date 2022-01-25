@@ -12,7 +12,8 @@
 
 ### Recommendation
 [Player's Work: Kakao - music -1](https://brunch.co.kr/@kakao-it/282)<br>
-[Player's Work: Kakao - music -2](https://brunch.co.kr/@kakao-it/342#)
+[Player's Work: Kakao - music -2](https://brunch.co.kr/@kakao-it/342#)<br>
+[Online prediction](https://huyenchip.com/2022/01/02/real-time-machine-learning-challenges-and-solutions.html)<br>
 
 ## About Skill Set(Software)
 [Pandas best practices-1](https://www.kaggle.com/faressayah/data-science-best-practices-with-pandas-part-1)<br>
