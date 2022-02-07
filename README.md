@@ -20,7 +20,7 @@
 [Pandas best practices-2](https://www.kaggle.com/faressayah/data-science-best-practices-with-pandas-part-2)
 
 ## About Skill Set(ML)
-[unbalance data - sampling](https://www.kaggle.com/rafjaa/resampling-strategies-for-imbalanced-datasets)<br>
+[Inbalanced dataset - sampling](https://www.kaggle.com/rafjaa/resampling-strategies-for-imbalanced-datasets)<br>
 
 
 ## Etc.
