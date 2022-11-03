@@ -76,11 +76,66 @@ FTRL은 이론적으로 분석하기 편하게 만드는 방법으로 알려져�
 encoding을 위해서는 roundoff error를 만들 수 있다.(그러나 명시적인 rounding을 통해 (regret term을 더 해주어) 이산화에 대한 오류를 평균이 0이 되도록 할 수 있다.)
 
 ### 4.3 Traninig many similar models
+하이퍼 파라미터나 feature의 변경을 실험할 때, 하나의 form의 많은 variant을 평가하는 것은 유용하다.
+고정된 모델을 활용하면서 다른 variation의 residual error를 평가하는 방법을 활용하면 저렴하다. 
+그러나 이러한 방법은 feature의 제거나 alternate learning 세팅에서는 어려움이 있다.
 
+몇몇 계수들은 여러 모델 variants들 사이에서 공유될 수 있지만, 일부 데이터들은 모델의 특수 값들이 때문에 사이에서 공유될 수 없다.
+모델의 계수를 hash table을 통해 저장하면, 모든 variant들에 대해 하나의 table을 활용할 수 있다. 
+여러 모델을 한번에 학습 시키면 공유할 수 있는 데이터들이 늘어 메모리를 아낄 수 있을 뿐만아니라, 네트워크 대역, CPU, 디스크 공간을 아낄 수 있다. 
 
+### 4.4 A single value structure
+일부 feature의 추가나 제거의 차이만 있는 다양한 모델을 평가하고자 할 때, single value structure을 활용할 수 있다.
+이는 모든 모델이 공유하는 하나의 계수만 저장하는 방식이다.
 
+### 4.5 Computing learning rates with counts
+모든 확률이 일정하다고 할 때, approximation을 활용해서 N과 P의 수만 기록하고 추적하도록 설정할 수 있다.
+logistic regression의 경우, negative event의 gradient가 p일 때 positive event에 대한 gradient를 p-1로 나타낼 수 있다. 
+이렇게 approximation을 활용하는 경우, 더 작은 공간을 차지하지만 모든 합을 활용해 계산한 learning rate와 비슷한 결과를 보인다.
 
+### 4.6 Subsampling training data
+일반적으로 CTR은 50% 이하이므로, click이 된 경우가 상대적으로 희귀하다.
+그러므로 클릭에 대한 단순한 통계값들이 CTR을 학습하는 데에 더 높은 가치를 지닌다.
+우리는 이러한 특징을 활용해서 정확도에 최소한의 영향을 주며 학습 데이터를 줄일 수 있다.
+- 모든 클릭을 활용하고,
+- 클릭이 되지 않은 경우 일정 확률 _r_에 의해 활용한다.
 
+이러한 sampling 데이터는 모델의 예측에 bias를 야기할 수 있지만, 단순한 weight를 적용하면서 해결할 수 있다.
 
+## 5 Evaliating Model Performance
+모델의 성능을 평가하는 것은 쌓여있는 과거의 로그를 활용하면 저렴하게 할 수 있다. 
+AucLoss(1 - AUC), LogLoss, SquaredError를 계산하여 모델의 성능을 평가하였다.
 
+### 5.1 Progressive validation
+논문에서는 데이터 셋에서 이루어지는 cross-validation이나 evalution보다는 Progressive validation(online loss)를 활용했다.
+online loss는 100%의 데이터를 활용하기 때문에 데이터셋에서 이루어지는 통계들보다 더 좋은 통계이다.
+절대적 평가지표 값은 종종 잘못될 수 있다. 그러므로 상대적 변화를 바라보고 baseline보다 몇 % 개선되었는지 측정한다.
 
+### 5.2 Deep understanding through visualization
+종합된 성능 평가지표는 데이터 각각의 작은 특정 변화의 효과를 가릴 수 있다.
+다양한 슬라이스의 데이터에 따라 다른 결과를 보일 수 있으므로, 데이터의 종합을 효과적으로 볼 수 있는 시각적인 요약은 필수적이다. 
+이에 따라 GridViz를 개발하여 확인할 수 있도록 했다.
+
+## 6. Confidence Estimates
+많은 어플리케이션에서는 CTR을 계산하는 것도 중요하지만, 예측한 값의 기대 정확도도 중요한 요소이다. 
+이에 따라 더 많은 데이터의 수집을 위해 데이터가 부족한 것들을 더 틀어줄 수도 있다.
+
+또한 예측 시 비싸지 않게 측정이 가능해야한다. 
+이를 측정하기 위해 예측 정확도를 정량화하는 uncertainty score라는 휴리스틱 기법을 제안한다. 
+학습 알고리즘들은 learning rate 조절을 위해 내부적으로 불확실성을 위한 카운터를 유지한다.
+해당 값을 이용해 계산하면, 불확실성 점수는 다음과 같이 하나의 내적 식으로 표현할 수 있다. 
+> u(x) ≡ αη · x
+
+## 7. Calibrating Predictions
+경매를 실행하기 위해서는 정확하고 잘 보정된 예측이 필수적이다.
+또한 calibration으로 CTR예측 모델과 경매를 위한 최적화를 구분할 수 있다.
+실제 집행된 CTR과 예측값들의 차이는 부적절한 모델 가설, 학습 알고리즘 내에서의 결핍, hidden feature의 제공 차이 등 다양한 이유에서 발생할 수 있다.
+
+이러한 문제를 해결하기 위해 calibration layer를 둘 수 있다. 
+간단한 방법으로는 aggregate 된 데이터에서 포아송 회귀를 활용해 아래의 식에서 γ와 κ를 학습하는 방법이 있다. 
+> τ(p) = γp^κ
+조금 더 일반적으로는 편향 곡선의 복잡함에 대응하기 위해 일부에 조금씩 선형 함수나 상수 수정 함수를 두는 방법이 있다.
+τ의 유일한 제약조건은 단조 증가해야 한다는 것이다.
+이를 위해 단조 증가 회귀(isotonic regression)에 가중 최소 제곱을 계산하여 맞는 값을 찾을 수 있고, 이러한 조각별 선형 접근은 예측값의 최소 최대에서 편향치를 감소시킨다. 
+
+## 8. Automated Feature Management
