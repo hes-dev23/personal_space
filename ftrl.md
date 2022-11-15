@@ -1,5 +1,5 @@
 # Ad Click Prediction: a View from the Trenches
-Ad Click Prediction: a View from the Trenches(link)[https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/41159.pdf]
+[Ad Click Prediction: a View from the Trenches](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/41159.pdf)
 
 ## 1. Introduction
 온라인 광고 시장은 기계 학습이 성공한 사례 중 하나이다.
@@ -35,6 +35,7 @@ feature vector x는 몇 십억 차원을 가지지만 실제로는 몇 백 정�
 
 학습을 위한 gradient는 다음과 같다. 
 > ▽lt(w) = (σ(w · xt) − yt)xt = (pt − yt)xt
+
 현실에서는 최종 모델의 크기가 중요한 고려 요소이므로, sparse한 모델의 계수들이 어떻게 저장되느냐에 따라 메모리 사용양이 달라진다.
 OGD(Online Gradient Descent)는 이러한 sparse 모델을 생성하는것에 효과적이지 않다.
 단순히 L1 penalty를 더하는 것만으로도 zero인 계수를 만들 수 없다. 
@@ -134,8 +135,34 @@ online loss는 100%의 데이터를 활용하기 때문에 데이터셋에서 �
 이러한 문제를 해결하기 위해 calibration layer를 둘 수 있다. 
 간단한 방법으로는 aggregate 된 데이터에서 포아송 회귀를 활용해 아래의 식에서 γ와 κ를 학습하는 방법이 있다. 
 > τ(p) = γp^κ
+
 조금 더 일반적으로는 편향 곡선의 복잡함에 대응하기 위해 일부에 조금씩 선형 함수나 상수 수정 함수를 두는 방법이 있다.
 τ의 유일한 제약조건은 단조 증가해야 한다는 것이다.
-이를 위해 단조 증가 회귀(isotonic regression)에 가중 최소 제곱을 계산하여 맞는 값을 찾을 수 있고, 이러한 조각별 선형 접근은 예측값의 최소 최대에서 편향치를 감소시킨다. 
+이를 위해 단조 증가 회귀(isotonic re에 가중 최소 제곱을 계산하여 맞는 값을 찾을 수 있고, 이러한 조각별 선형 접근은 예측값의 최소 최대에서 편향치를 감소시킨다. 
 
 ## 8. Automated Feature Management
+수 많은 모델을 여러 곳에서 활용하는 구조이기 때문에 자동화된 입력 신호 관리 체계가 필요하다.
+광고가 표기된 언어나 국가 등과 같은 여러 모델이 활용할 수 있는 많은 입력 신호를 관리하기 위해 metadata index를 개발하여 활용한다.
+이로 인해 다양한 입력 신호는 관리 종료, 플랫폼 특화된 사용 가능 여부, 도메인 특성에 따른 적용여부 등이 자동으로 관리된다.
+
+새로운 신호는 자동으로 테스트 되며 심사된다. 
+이러한 자동화된 신호 소비 관리는 많은 학습이 한 번에 정확하게 완료될 수 있도록 한다.
+또한 이는 중복된 엔지니어링 노력의 낭비를 막을 수 있고, 엔지니어링 시간을 아껴준다.
+
+## 9. Unsuccessful Experiments
+### 9.1 agressive feature hashing
+최근 대규모 학습을 위해 hashing이 좋은 효과를 발휘하였으나(spam filtering, display advertisement data), 해당 실험에서는 졸은 효과를 보이지 못했다. 
+### 9.2 dropout
+dropout은 feature 집단에서 bagging을 하는 것과 같이 regularization의 효과를 가져와 DNN에서 좋은 효과를 보였다.
+본 연구에서도 0.1에서 0.5까지 dropout을 시도했으나, 효과를 보이지 못했다.
+연구자들은 ctr 예측 문제에서 feature의 sparsity로 인해 feature의 분포가 달라서 큰 효과를 얻지 못한 것이라고 생각한다. 
+
+### 9.3 feature bagging
+데이터 마이닝 때 decision tree를 활용한 방법에서, 앙상블 방법 중에 하나인 bagging을 활용해 좋은 성과를 얻을 수 있다.
+그러나 본 연구에서 이러한 방법을 적용시 예측 성능을 조금씩 떨어뜨리는 결과를 가져왔다. 
+
+### 9.4 feature vector normalization
+연구에서 활용된 모델에서는 0이 아닌 feature가 서로 다른 크기를 가지고 있다.
+서로 다른 크기의 feature들은 학습 과정에서 수렴을 느리게 할 수 있고, 또 예측 성능에 영향을 줄 수 있다. 
+이를 우려하여 여러가지 normalization을 적용하여 테스트한 결과, 학습 초기에는 정확도의 증가를 가져왔으나, positive metric으로 해석되지 못했다.
+
